@@ -1,0 +1,14 @@
+﻿INSERT INTO Utterances (Id, Phrase, VideoPath) VALUES (1, 'bom dia', 'bomdia.mp4');
+INSERT INTO Utterances (Id, Phrase, VideoPath) VALUES (1, 'boa tarde', 'boatarde.mp4');
+INSERT INTO Utterances (Id, Phrase, VideoPath) VALUES (1, 'boa noite', 'boanoite.mp4');
+INSERT INTO Utterances (Id, Phrase, VideoPath) VALUES (1, 'tudo bem', 'tudobem.mp4');
+INSERT INTO Utterances (Id, Phrase, VideoPath) VALUES (1, 'meu nome é', 'meunome.mp4');
+INSERT INTO Utterances (Id, Phrase, VideoPath) VALUES (1, 'você', 'voce.mp4');
+INSERT INTO Utterances (Id, Phrase, VideoPath) VALUES (1, 'oi', 'oi.mp4');
+INSERT INTO Utterances (Id, Phrase, VideoPath) VALUES (1, 'olá', 'oi.mp4');
+INSERT INTO Utterances (Id, Phrase, VideoPath) VALUES (1, 'hoje', 'hoje.mp4');
+INSERT INTO Utterances (Id, Phrase, VideoPath) VALUES (1, 'aula', 'aula.mp4');
+INSERT INTO Utterances (Id, Phrase, VideoPath) VALUES (1, 'vai', 'vai.mp4');
+INSERT INTO Utterances (Id, Phrase, VideoPath) VALUES (1, 'sobre', 'sobre.mp4');
+INSERT INTO Utterances (Id, Phrase, VideoPath) VALUES (1, 'surdos', 'surdos.mp4');
+INSERT INTO Utterances (Id, Phrase, VideoPath) VALUES (1, 'mudos', ',mudos.mp4');
