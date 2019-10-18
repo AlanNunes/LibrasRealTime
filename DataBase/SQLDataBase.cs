@@ -39,7 +39,7 @@ namespace PIC.DataBase
             {
                 using (var cmd = DBConnection().CreateCommand())
                 {
-                    cmd.CommandText = "CREATE TABLE IF NOT EXISTS Utterances(Id INT, Phrase VARCHAR(255), VideoPath VARCHAR(255))";
+                    cmd.CommandText = "CREATE TABLE IF NOT EXISTS Utterances(Phrase VARCHAR(255), VideoPath VARCHAR(255))";
                     cmd.ExecuteNonQuery();
                 }
             }
@@ -75,21 +75,19 @@ namespace PIC.DataBase
             {
                 using (var cmd = DBConnection().CreateCommand())
                 {
-                    cmd.CommandText = "SELECT * FROM 'Utterances'";
-                    SQLiteDataReader r = cmd.ExecuteReader();
-                    while (r.Read())
+                    cmd.CommandText = $"SELECT * FROM 'Utterances' WHERE Phrase = '{text}'";
+                    using (SQLiteDataReader r = cmd.ExecuteReader())
                     {
-                        Task<int> distance = Task.Run(() =>
-                        {
-                            return TextProcessing.LevenshteinDistance(text, r["Phrase"].ToString());
-                        });
-                        if (distance.Result <= 2)
+                        if (r.Read())
                         {
                             return r["VideoPath"].ToString();
                         }
+                        else
+                        {
+                            return null;
+                        }
                     }
                 }
-                return null;
             }
             catch (Exception ex)
             {

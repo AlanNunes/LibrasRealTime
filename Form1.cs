@@ -35,7 +35,7 @@ namespace PIC2019
         {
             // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
-            var config = SpeechConfig.FromSubscription("199b2e472a8c416da895333a283b6577", "westus");
+            var config = SpeechConfig.FromSubscription("74b9da07361f4ee5b42ba0f5c432084d", "westus");
             config.SpeechRecognitionLanguage = "pt-BR";
             config.SetProfanity(ProfanityOption.Raw);
 
@@ -69,9 +69,7 @@ namespace PIC2019
                 if (result.Reason == ResultReason.RecognizedSpeech)
                 {
                     Console.WriteLine($"We recognized: {result.Text}");
-                    startTextFromIndex = 0;
-                    mediaPlayer.URL = @"C:\Users\alann\Videos\bomdia.mp4";
-                    mediaPlayer.Ctlcontrols.play();
+                    //startTextFromIndex = 0;
                 }
                 else if (result.Reason == ResultReason.NoMatch)
                 {
@@ -106,9 +104,13 @@ namespace PIC2019
                         fila.Enfileira(videoPath);
                         if (fila.GetVideos.Count == 1)
                         {
-                            mediaPlayer.Ctlcontrols.stop();
-                            mediaPlayer.URL = @"C:\Users\alann\Videos\" + fila.Desenfileira();
-                            mediaPlayer.Ctlcontrols.play();
+                            Console.WriteLine("Media Player State: " + mediaPlayer.playState);
+                            if (mediaPlayer.playState != WMPPlayState.wmppsPlaying)
+                            {
+                                mediaPlayer.Ctlcontrols.stop();
+                                mediaPlayer.URL = @"C:\Users\alann\Videos\" + fila.Desenfileira();
+                                mediaPlayer.Ctlcontrols.play();
+                            }
                         }
                     }
                 }
@@ -143,20 +145,6 @@ namespace PIC2019
             {
                 MessageBox.Show("Error.");
             }
-
         }
-
-        //private void mediaPlayer_PlayStateChange(object sender, AxWMPLib._WMPOCXEvents_PlayStateChangeEvent e)
-        //{
-        //    if (mediaPlayer.playState == WMPLib.WMPPlayState.wmppsStopped)
-        //    {
-        //        if (fila.GetVideos.Count > 0)
-        //        {
-        //            mediaPlayer.Ctlcontrols.stop();
-        //            mediaPlayer.URL = @"C:\Users\alann\Videos\" + fila.Desenfileira();
-        //            mediaPlayer.Ctlcontrols.play();
-        //        }
-        //    }
-        //}
     }
 }

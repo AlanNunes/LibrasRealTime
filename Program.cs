@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PIC.Classes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,6 +17,7 @@ namespace PIC2019
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            Settings.ConfigDataBase();
             Application.Run(new Form1());
         }
     }
