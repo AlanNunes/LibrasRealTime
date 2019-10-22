@@ -18,8 +18,11 @@ namespace PIC.Classes
 
         public string Desenfileira()
         {
-            string url = GetVideos.First();
-            GetVideos.RemoveAt(0);
+            string url = GetVideos.FirstOrDefault();
+            if(GetVideos.Count > 0)
+            {
+                GetVideos.RemoveAt(0);
+            }
             return url;
         }
 

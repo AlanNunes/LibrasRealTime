@@ -17,6 +17,7 @@ namespace PIC2019
     public partial class Form1 : Form
     {
         Fila fila = new Fila();
+        bool ended = true;
         public Form1()
         {
             InitializeComponent();
@@ -25,6 +26,13 @@ namespace PIC2019
         private async void button1_Click(object sender, EventArgs e)
         {
             int startTextFromIndex = 0;
+            //mediaPlayer.URL = @"C:\Users\alann\Videos\oi.mp4";
+            //mediaPlayer.Ctlcontrols.next(); // activates the next button
+            //WMPLib.IWMPMedia media = mediaPlayer.newMedia(@"C:\Users\alann\Videos\tudobem.mp4");
+            //mediaPlayer.currentPlaylist.appendItem(media);
+            //mediaPlayer.Ctlcontrols.play(); // activates the play button
+            //WMPLib.IWMPMedia media2 = mediaPlayer.newMedia(@"C:\Users\alann\Videos\oi.mp4");
+            //mediaPlayer.currentPlaylist.appendItem(media2);
             while (true)
             {
                 await RecognizeSpeechAsync(startTextFromIndex);
@@ -52,15 +60,14 @@ namespace PIC2019
                 // For long-running multi-utterance recognition, use StartContinuousRecognitionAsync() instead.
                 recognizer.Recognized += async (e, r) =>
                 {
+                    //Console.WriteLine("Recognized:::" + r.Result.Text);
                     if (r.Result.Text.Length < startTextFromIndex)
                     {
                         startTextFromIndex = 0;
                     }
                     string speechProcessed = await TextProcessing.GetTextProcessed(r.Result.Text, startTextFromIndex);
-                    await Task.Run(() =>
-                    {
-                        startTextFromIndex = r.Result.Text.Length;
-                    });
+                    Console.WriteLine("Text Processed:::" + speechProcessed);
+                    startTextFromIndex = r.Result.Text.Length;
                     await TryToTranslate(speechProcessed);
                 };
                 var result = await recognizer.RecognizeOnceAsync();
@@ -96,37 +103,115 @@ namespace PIC2019
             {
                 if (!String.IsNullOrEmpty(txt))
                 {
+                    string videoPath;
                     string speech = txt.Remove(txt.Length - 1);
-                    string videoPath = SQLDataBase.GetVideoPath(speech);
-                    if (videoPath != null)
+                    string[] words = speech.Split(' ');
+                    int i = 0;
+                    while (true)
                     {
-                        Console.WriteLine(videoPath);
-                        fila.Enfileira(videoPath);
-                        if (fila.GetVideos.Count == 1)
+                        if (words.Length == 1)
                         {
-                            Console.WriteLine("Media Player State: " + mediaPlayer.playState);
-                            if (mediaPlayer.playState != WMPPlayState.wmppsPlaying)
+                            videoPath = SQLDataBase.GetVideoPath(words[i]);
+                            if (!String.IsNullOrEmpty(videoPath))
                             {
-                                mediaPlayer.Ctlcontrols.stop();
-                                mediaPlayer.URL = @"C:\Users\alann\Videos\" + fila.Desenfileira();
-                                mediaPlayer.Ctlcontrols.play();
+                                Enfileira(videoPath);
                             }
+                            break;
+                        }
+                        if ((words.Length - 1) < i)
+                        {
+                            break;
+                        }
+                        if((words.Length - 1) < i + 1)
+                        {
+                            videoPath = null;
+                        }
+                        else
+                        {
+                            videoPath = SQLDataBase.GetVideoPath(words[i] + ' ' + words[i + 1]);
+                        }
+                        if (String.IsNullOrEmpty(videoPath))
+                        {
+                            videoPath = SQLDataBase.GetVideoPath(words[i]);
+                            if (!String.IsNullOrEmpty(videoPath))
+                            {
+                                Enfileira(videoPath);
+                            }
+                            i++;
+                        }
+                        else
+                        {
+                            Enfileira(videoPath);
+                            i = i + 2;
                         }
                     }
                 }
             });
         }
 
+        private void Enfileira(string videoPath)
+        {
+            if (videoPath != null)
+            {
+                Console.WriteLine(videoPath);
+                fila.Enfileira(videoPath);
+                if (fila.GetVideos.Count == 1)
+                {
+                    if (mediaPlayer.playState != WMPPlayState.wmppsPlaying && mediaPlayer.playState != WMPPlayState.wmppsTransitioning)
+                    {
+                        lock (fila)
+                        {
+                            string _fila = fila.Desenfileira();
+                            Console.WriteLine("entrou: " + _fila);
+                            if (!String.IsNullOrEmpty(_fila))
+                            {
+                                Console.WriteLine("entrou2: " + _fila);
+                                try
+                                {
+                                    //mediaPlayer.URL = @"C:\Users\alann\Videos\" + _fila;
+                                    WMPLib.IWMPMedia media = mediaPlayer.newMedia(@"C:\Users\alann\Videos\" + _fila);
+                                    mediaPlayer.currentPlaylist.appendItem(media);
+                                    mediaPlayer.Ctlcontrols.play(); // activates the play button
+                                    //mediaPlayer.Ctlcontrols.play();
+                                    //mediaPlayer.URL = fullPathOfYourFirstMedia;
+                                    //mediaPlayer.Ctlcontrols.play(); // activates the play button
+                                    //mediaPlayer.Ctlcontrols.next(); // activates the next button
+                                    //WMPLib.IWMPMedia media = mediaPlayer.newMedia(fullPathOfYourSecondMedia);
+                                    //mediaPlayer.currentPlaylist.appendItem(media);
+                                }
+                                catch (Exception e)
+                                {
+
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         private void mediaPlayer_PlayStateChange(object sender, AxWMPLib._WMPOCXEvents_PlayStateChangeEvent e)
         {
-            if (mediaPlayer.playState == WMPLib.WMPPlayState.wmppsStopped)
+            if (e.newState == 8)//Media finished
+            {
+                ended = true;
+            }
+
+            if (e.newState != 8)//Stopped & ended
             {
                 if (fila.GetVideos.Count > 0)
                 {
-                    mediaPlayer.Ctlcontrols.stop();
-                    mediaPlayer.URL = @"C:\Users\alann\Videos\" + fila.Desenfileira();
-                    mediaPlayer.Ctlcontrols.play();
+                    lock (fila)
+                    {
+                        //mediaPlayer.Ctlcontrols.stop();
+                        //mediaPlayer.URL = @"C:\Users\alann\Videos\" + fila.Desenfileira();
+                        //mediaPlayer.Ctlcontrols.play();
+                        WMPLib.IWMPMedia media = mediaPlayer.newMedia(@"C:\Users\alann\Videos\" + fila.Desenfileira());
+                        mediaPlayer.currentPlaylist.appendItem(media);
+                        mediaPlayer.Ctlcontrols.play(); // activates the play button
+                    }
                 }
+                ended = false;
             }
         }
 
